@@ -1,3 +1,12 @@
+---
+timestamp: 'Sun Oct 19 2025 17:28:56 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251019_172856.0ab04473.md]]'
+content_id: ba12bfde05e5091d993fdb3d373d78c4806b292faf8c6de854fe117b54b2ad0a
+---
+
+# test: HistoricalContextAgent
+
+```typescript
 /**
  * AIHistoricalContextAgent Test Cases
  * 
@@ -6,7 +15,7 @@
 
 import AIHistoricalContextAgentConcept from './AIHistoricalContextAgent.ts';
 import { GeminiLLM, Config } from '../../gemini-llm.ts';
-import { testDb } from '@utils/database.ts';
+import { getDb } from '@utils/database.ts';
 import { ID } from '@utils/types.ts';
 import "jsr:@std/dotenv/load";
 
@@ -49,7 +58,9 @@ Deno.test("Principle Test: Boston Historical Context: generate context and ask f
     console.log('\n🧪 Principle Test: Boston Historical Context');
     console.log('=================================================');
     
-    const [db, client] = await testDb();
+    const dbResult = await getDb();
+    const db = dbResult[0];
+    const client = dbResult[1];
     
     try {
         const agent = new AIHistoricalContextAgentConcept(db);
@@ -169,7 +180,9 @@ Deno.test("Variant Test 1: Retrieve chat history using _getChat", async () => {
     console.log('\n🧪 Variant Test 1: Retrieve chat history using _getChat');
     console.log('=================================================');
     
-    const [db, client] = await testDb();
+    const dbResult = await getDb();
+    const db = dbResult[0];
+    const client = dbResult[1];
     
     try {
         const agent = new AIHistoricalContextAgentConcept(db);
@@ -246,7 +259,9 @@ Deno.test("Variant Test 2: Clear session functionality", async () => {
     console.log('\n🧪 Variant Test 2: Clear session functionality');
     console.log('=================================================');
     
-    const [db, client] = await testDb();
+    const dbResult = await getDb();
+    const db = dbResult[0];
+    const client = dbResult[1];
     
     try {
         const agent = new AIHistoricalContextAgentConcept(db);
@@ -330,7 +345,9 @@ Deno.test("Variant Test 3: Error handling with invalid inputs", async () => {
     console.log('\n🧪 Variant Test 3: Error handling with invalid inputs');
     console.log('=================================================');
     
-    const [db, client] = await testDb();
+    const dbResult = await getDb();
+    const db = dbResult[0];
+    const client = dbResult[1];
     
     try {
         const agent = new AIHistoricalContextAgentConcept(db);
@@ -348,18 +365,11 @@ Deno.test("Variant Test 3: Error handling with invalid inputs", async () => {
             radius: 5000 
         });
         
-        // Accept either an error response OR a "No significant historical location" response
-        if ('error' in invalidCoordsResult) {
-            console.log(`✓ Correctly returned error: "${invalidCoordsResult.error}"`);
-        } else if ('mainLocation' in invalidCoordsResult && 
-                   (invalidCoordsResult.mainLocation === 'No significant historical location' || 
-                    invalidCoordsResult.mainLocation.toLowerCase().includes('no significant'))) {
-            console.log(`✓ Correctly handled invalid coordinates with: "${invalidCoordsResult.mainLocation}"`);
-            // Clean up the session created
-            await agent.clearSession({ sessionId: invalidCoordsResult.sessionId as ID, user: testUser });
-        } else {
-            throw new Error('Expected error or "No significant historical location" response for invalid coordinates');
+        if (!('error' in invalidCoordsResult)) {
+            throw new Error('Expected error for invalid coordinates');
         }
+        
+        console.log(`✓ Correctly returned error: "${invalidCoordsResult.error}"`);
         
         // Test 2: Invalid radius (negative)
         console.log('\nStep 2: Testing generateContext with negative radius...');
@@ -442,3 +452,5 @@ Deno.test("Variant Test 3: Error handling with invalid inputs", async () => {
         await client.close();
     }
 });
+
+```

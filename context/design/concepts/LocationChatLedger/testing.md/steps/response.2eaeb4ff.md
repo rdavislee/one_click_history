@@ -1,8 +1,9 @@
-[@implementation](implementation.md)
+---
+timestamp: 'Sun Oct 19 2025 17:29:52 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251019_172952.917ec925.md]]'
+content_id: 2eaeb4ffc99fb81542ff784982ca5a3a884c3bcee9937269c859cc17fa25afad
+---
 
-[@testing-concepts](../../background/testing-concepts.md)
-
-# test: LocationChatLedger
 # response:
 
 ```typescript

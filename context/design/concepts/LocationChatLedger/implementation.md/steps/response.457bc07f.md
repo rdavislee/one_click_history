@@ -1,44 +1,9 @@
-[@concept-design-overview](../../background/concept-design-overview.md)
+---
+timestamp: 'Sun Oct 19 2025 17:30:24 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251019_173024.6916cd7c.md]]'
+content_id: 457bc07f930fd71a57aeb99227bb2f5b0a3e93b8aa1d2cd22b3d3801a2b31b71
+---
 
-[@concept-specifications](../../background/concept-specifications.md)
-
-[@implementing-concepts](../../background/implementing-concepts.md)
-
-# implement: LocationChatLedger
-
-# concept: LocationChatLedger
-*   **concept**: LocationChatLedger [User]
-*   **purpose**: To preserve location-based historical explorations for future reference.
-*   **principle**: After creating a chat for a location with radius, user can retrieve it later to continue exploration or review past discoveries.
-*   **state**:
-    *   A set of `ChatEntries` with
-        *   an `id` of type `String` (sessionId from chat agent)
-        *   a `user` of type `User`
-        *   a `centerLocation` of type `Coordinates` (lat, lng)
-        *   a `radius` of type `Number` (in meters)
-        *   a `mainLocation` of type `String` (descriptive name)
-        *   a `createdAt` of type `DateTime`
-*   **actions**:
-    *   `recordChat (sessionId: String, user: User, location: Coordinates, radius: Number, mainLocation: String)`
-        *   **requires**: user is authenticated, sessionId is valid
-        *   **effects**: Creates new chat entry c with c.id=sessionId, c.user=user, c.centerLocation=location, c.radius=radius, c.mainLocation=mainLocation, sets c.createdAt to current time.
-    *   `getUserChats (user: User): (chats: List<ChatEntry>)`
-        *   **requires**: user is authenticated
-        *   **effects**: Creates new chat c with c.user=user, c.centerLocation=location, c.radius=radius, generates unique id, sets c.createdAt to current time, initializes empty messages list. Returns chat id.
-    *   `setContext (chatId: String, context: String, mainLocation: String)`
-        *   **requires**: chat with chatId exists
-        *   **effects**: Sets chat.context=context and chat.mainLocation=mainLocation
-    *   `addMessage (chatId: String, question: String, answer: String)`
-        *   **requires**: chat with chatId exists
-        *   **effects**: Appends new Message(question, answer) to chat.messages
-    *   `getUserChats (user: User): (chats: List<Chat>)`
-        *   **requires**: user is authenticated
-        *   **effects**: Returns all chats where chat.user=user, sorted by createdAt descending
-    *   `getChat (chatId: String, user: User): (chat: Chat)`
-        *   **requires**: chat exists with chatId and chat.user=user
-        *   **effects**: Returns the chat
-
-# file: src/LocationChatLedegr/LocationChatLedger.ts
 # response:
 
 Here's the implementation for the `LocationChatLedgerConcept` following your guidelines:

@@ -1,3 +1,12 @@
+---
+timestamp: 'Sun Oct 19 2025 17:31:18 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251019_173118.23bb90e8.md]]'
+content_id: 6880d45116b68c873f87c5a00e24c2e501031d8e8f049598f35913831e5ee407
+---
+
+# file: deno.json
+
+```json
 {
     "nodeModulesDir": "auto",
     "imports": {
@@ -12,3 +21,4 @@
         "historical": "deno run --allow-net --allow-read --allow-env src/historical-cli.ts"
     }
 }
+```
