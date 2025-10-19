@@ -1,0 +1,7 @@
+---
+timestamp: 'Sun Oct 19 2025 16:37:47 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251019_163747.78c40273.md]]'
+content_id: 1941523c58f70a494a5a81e897e4c3beadc10de766cd1a5bed78f017fd9815f0
+---
+
+# file: src/UserAuthentication/UserAuthentication.ts

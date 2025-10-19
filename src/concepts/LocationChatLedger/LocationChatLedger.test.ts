@@ -1,11 +1,3 @@
-[@implementation](implementation.md)
-
-[@testing-concepts](../../background/testing-concepts.md)
-
-# test: LocationChatLedger
-# response:
-
-```typescript
 import { assertEquals, assertArrayIncludes, assertExists } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
@@ -274,4 +266,3 @@ Deno.test("Principle Test: Track location-based chat sessions for future retriev
     await client.close();
   }
 });
-```

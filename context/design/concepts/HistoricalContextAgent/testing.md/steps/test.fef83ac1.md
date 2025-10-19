@@ -1,3 +1,12 @@
+---
+timestamp: 'Sun Oct 19 2025 18:09:18 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251019_180918.b71254c0.md]]'
+content_id: fef83ac155ac475481619a40a6e30cecadc1061eab51a141fe79a7a998e3871d
+---
+
+# test: HistoricalContextAgent
+
+```typescript
 /**
  * AIHistoricalContextAgent Test Cases
  * 
@@ -442,3 +451,5 @@ Deno.test("Variant Test 3: Error handling with invalid inputs", async () => {
         await client.close();
     }
 });
+
+```

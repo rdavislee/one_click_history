@@ -1,3 +1,6 @@
+# test: HistoricalContextAgent
+
+```typescript
 /**
  * AIHistoricalContextAgent Test Cases
  * 
@@ -442,3 +445,5 @@ Deno.test("Variant Test 3: Error handling with invalid inputs", async () => {
         await client.close();
     }
 });
+
+```
