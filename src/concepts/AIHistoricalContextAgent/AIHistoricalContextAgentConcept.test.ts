@@ -4,7 +4,7 @@
  * Demonstrates generating historical context and asking follow-up questions
  */
 
-import AIHistoricalContextAgentConcept from './AIHistoricalContextAgent.ts';
+import AIHistoricalContextAgentConcept from './AIHistoricalContextAgentConcept.ts';
 import { GeminiLLM, Config } from '../../gemini-llm.ts';
 import { testDb } from '@utils/database.ts';
 import { ID } from '@utils/types.ts';

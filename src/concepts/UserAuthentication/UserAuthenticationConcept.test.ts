@@ -1,6 +1,6 @@
 import { assertEquals, assertNotEquals, assert } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
-import UserAuthenticationConcept from "./UserAuthentication.ts";
+import UserAuthenticationConcept from "./UserAuthenticationConcept.ts";
 import { ID } from "@utils/types.ts";
 
 Deno.test("Principle: Registration, successful login, and rejection of duplicate registration", async () => {

@@ -1,7 +1,7 @@
 import { assertEquals, assertArrayIncludes, assertExists } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
-import LocationChatLedgerConcept from "./LocationChatLedger.ts";
+import LocationChatLedgerConcept from "./LocationChatLedgerConcept.ts";
 
 // Define dummy data for testing
 interface Coordinates {

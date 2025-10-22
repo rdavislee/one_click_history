@@ -3,6 +3,8 @@ import { getDb } from "@utils/database.ts";
 import { walk } from "jsr:@std/fs";
 import { parseArgs } from "jsr:@std/cli/parse-args";
 import { toFileUrl } from "jsr:@std/path/to-file-url";
+import { GeminiLLM, Config } from "./gemini-llm.ts";
+import "jsr:@std/dotenv/load";
 
 // Parse command-line arguments for port and base URL
 const flags = parseArgs(Deno.args, {
@@ -18,11 +20,47 @@ const BASE_URL = flags.baseUrl;
 const CONCEPTS_DIR = "src/concepts";
 
 /**
+ * Load Gemini LLM configuration
+ */
+function loadGeminiConfig(): Config {
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.0-flash-exp";
+  
+  if (!apiKey) {
+    console.warn('⚠️  Warning: GEMINI_API_KEY not set. AIHistoricalContextAgent endpoints will not work.');
+    return { apiKey: "", model };
+  }
+
+  // Load additional configuration from geminiConfig.json (optional)
+  let additionalConfig = {};
+  try {
+    const configPath = "./geminiConfig.json";
+    additionalConfig = JSON.parse(Deno.readTextFileSync(configPath));
+  } catch {
+    // geminiConfig.json is optional
+  }
+
+  return {
+    apiKey,
+    model,
+    ...additionalConfig
+  };
+}
+
+/**
  * Main server function to initialize DB, load concepts, and start the server.
  */
 async function main() {
   const [db] = await getDb();
   const app = new Hono();
+  
+  // Initialize Gemini LLM for AI-powered concepts
+  const geminiConfig = loadGeminiConfig();
+  const llm = geminiConfig.apiKey ? new GeminiLLM(geminiConfig) : null;
+  
+  if (llm) {
+    console.log(`✅ Initialized Gemini LLM with model: ${geminiConfig.model}`);
+  }
 
   app.get("/", (c) => c.text("Concept Server is running."));
 
@@ -65,9 +103,20 @@ async function main() {
       const methodNames = Object.getOwnPropertyNames(
         Object.getPrototypeOf(instance),
       )
-        .filter((name) =>
-          name !== "constructor" && typeof instance[name] === "function"
-        );
+        .filter((name) => {
+          // Only include constructor and methods
+          if (name === "constructor" || typeof instance[name] !== "function") {
+            return false;
+          }
+          // Exclude private helper methods (common patterns)
+          const privateHelperPatterns = [
+            /^create.*Prompt$/,  // createContextPrompt, createQuestionPrompt, etc.
+            /^parse.*Response$/,  // parseContextResponse, parseHallucinationCheckResponse
+            /^validate.*Response$/,  // validateContextResponse
+            /^create.*Check/,  // createHallucinationCheckPrompt
+          ];
+          return !privateHelperPatterns.some(pattern => pattern.test(name));
+        });
 
       for (const methodName of methodNames) {
         const actionName = methodName;
@@ -76,6 +125,12 @@ async function main() {
         app.post(route, async (c) => {
           try {
             const body = await c.req.json().catch(() => ({})); // Handle empty body
+            
+            // Inject LLM for methods that require it
+            if (llm && (methodName === 'generateContext' || methodName === 'answerQuestion')) {
+              body.llm = llm;
+            }
+            
             const result = await instance[methodName](body);
             return c.json(result);
           } catch (e) {

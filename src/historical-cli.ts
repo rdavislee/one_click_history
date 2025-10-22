@@ -4,7 +4,7 @@
  * Interactive CLI for generating historical context from coordinates and radius
  */
 
-import { AIHistoricalContextAgent } from './concepts/HistoricalContextAgent/AIHistoricalContextAgent.ts';
+import AIHistoricalContextAgentConcept from './concepts/AIHistoricalContextAgent/AIHistoricalContextAgentConcept.ts';
 import { GeminiLLM, Config } from './gemini-llm.ts';
 import "jsr:@std/dotenv/load";
 
@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     console.log('================================\n');
     
     // Initialize
-    const agent = new AIHistoricalContextAgent();
+    const agent = new AIHistoricalContextAgentConcept();
     const config = loadConfig();
     const llm = new GeminiLLM(config);
     
