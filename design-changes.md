@@ -34,3 +34,9 @@ This architectural redesign provides several advantages:
 - **Performance**: Users can browse chat history without loading all historical data
 - **Validation**: Real-time location checking ensures data integrity
 - **State Management**: Agents can be paused and resumed seamlessly
+
+# Design Changes since Assignment 4a
+
+## Overview
+
+The concepts have remained the same and the frontend has been fully developed. The location awareness is handled by the front end, simply passing coordinates to the back end. The front end has three pages, a login/registration page, a home page for accessing old chats or creating new ones, and a chat page for learning about historical context.

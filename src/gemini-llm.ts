@@ -49,7 +49,8 @@ export class GeminiLLM {
             });
 
             // Extract text from response
-            let fullText = '';
+            let thinkingText = '';
+            let responseText = '';
             const candidates = result.candidates?.[0]?.content?.parts;
             
             if (!candidates || candidates.length === 0) {
@@ -57,16 +58,27 @@ export class GeminiLLM {
             }
 
             for (const part of candidates) {
-                if (part.text) {
-                    fullText += part.text;
+                // Check if this part is thinking/reasoning
+                if (part.thought) {
+                    thinkingText += part.text || '';
+                } else if (part.text) {
+                    responseText += part.text;
                 }
             }
 
-            if (!fullText) {
+            // Log thinking to console if present (for debugging)
+            if (thinkingText) {
+                console.log('🤔 LLM Thinking:', thinkingText.substring(0, 200) + '...');
+            }
+
+            // Return only the actual response, not the thinking
+            const finalText = responseText || thinkingText;
+            
+            if (!finalText) {
                 throw new Error('Empty response from LLM');
             }
 
-            return fullText;
+            return finalText;
 
         } catch (error) {
             console.error('Error calling Gemini API:', (error as Error).message);
@@ -74,4 +86,5 @@ export class GeminiLLM {
         }
     }
 }
+
 
