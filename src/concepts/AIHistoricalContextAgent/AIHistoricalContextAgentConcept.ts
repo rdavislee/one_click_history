@@ -20,9 +20,12 @@ export interface Coordinates {
 
 /**
  * Represents a prompt/response exchange in a conversation.
+ * - prompt: Used for the initial context generation (full LLM prompt)
+ * - question: Used for follow-up questions (user's question only, not full prompt)
  */
-interface Exchange {
-  prompt: string;
+export interface Exchange {
+  prompt?: string;
+  question?: string;
   response: string;
 }
 
@@ -37,7 +40,7 @@ interface Exchange {
  *   a createdAt of type DateTime
  *   a conversationHistory of type List<Exchange> (prompt/response pairs)
  */
-interface Context {
+export interface Context {
   _id: ID; // sessionId
   user: ID;
   centerLocation: Coordinates;
@@ -185,8 +188,8 @@ Please correct these issues in your response. Pay special attention to the valid
    *
    * **requires**: Context exists with sessionId and context.user=user
    *
-   * **effects**: AI generates answer based on context and question, appends new Exchange(prompt, response) to context.conversationHistory. 
-   *              Returns answer grounded in historical context.
+   * **effects**: AI generates answer based on context and question, appends new Exchange(question, response) to context.conversationHistory. 
+   *              Returns answer grounded in historical context. Only the user's question is stored, not the full prompt.
    */
   async answerQuestion({
     llm,
@@ -216,10 +219,10 @@ Please correct these issues in your response. Pay special attention to the valid
       console.log('✅ Received answer from Gemini AI!');
       console.log(`   Answer: "${answer.substring(0, 100)}${answer.length > 100 ? '...' : ''}"`);
 
-      // Add prompt/response pair to conversation history
+      // Add question/response pair to conversation history (question only, not full prompt)
       await this.contexts.updateOne(
         { _id: sessionId },
-        { $push: { conversationHistory: { prompt, response: answer } } }
+        { $push: { conversationHistory: { question, response: answer } } }
       );
       
       return { answer };
@@ -255,6 +258,57 @@ Please correct these issues in your response. Pay special attention to the valid
   }
 
   /**
+   * getChat (user: User, mainLocation: String): (context: Context)
+   *
+   * **requires**: user is authenticated
+   *
+   * **effects**: Returns the most recent Context where context.user=user and context.mainLocation=mainLocation
+   */
+  async getChat({
+    user,
+    mainLocation,
+  }: {
+    user: ID;
+    mainLocation: string;
+  }): Promise<{ context: Context } | { error: string }> {
+    const context = await this.contexts
+      .find({ user, mainLocation })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .toArray();
+
+    if (!context || context.length === 0) {
+      return {
+        error: `No context found for user ${user} and location ${mainLocation}`,
+      };
+    }
+    
+    return { context: context[0] };
+  }
+
+  /**
+   * getChatForQuery (user: User, mainLocation: String): (context: Array<{context: Context}>)
+   *
+   * **requires**: user is authenticated
+   *
+   * **effects**: Returns the most recent Context wrapped in array format for query responses
+   */
+  async getChatForQuery({
+    user,
+    mainLocation,
+  }: {
+    user: ID;
+    mainLocation: string;
+  }): Promise<{ context: Array<{ context: Context }> } | { error: string }> {
+    const result = await this.getChat({ user, mainLocation });
+    if ('error' in result) {
+      return result;
+    }
+    // Return as array for query format: [{ context: Context }]
+    return { context: [{ context: result.context }] };
+  }
+
+  /**
    * _getChat (user: User, mainLocation: String): (context: Context)
    *
    * **requires**: user is authenticated
@@ -268,20 +322,12 @@ Please correct these issues in your response. Pay special attention to the valid
     user: ID;
     mainLocation: string;
   }): Promise<Array<{ context: Context }> | { error: string }> {
-    const context = await this.contexts
-      .find({ user, mainLocation })
-      .sort({ createdAt: -1 })
-      .limit(1)
-      .toArray();
-
-    if (!context || context.length === 0) {
-      return {
-        error: `No context found for user ${user} and location ${mainLocation}`,
-      };
+    const result = await this.getChat({ user, mainLocation });
+    if ('error' in result) {
+      return result;
     }
-    
     // Queries always return an array of dictionaries
-    return [{ context: context[0] }];
+    return [result];
   }
 
   /**
@@ -369,9 +415,18 @@ Return ONLY the JSON object, no additional text.`;
     const conversationContext = previousQA.length > 0
       ? `\n\nPREVIOUS CONVERSATION:\n${previousQA
           .map((exchange, index) => {
-            // Extract the question from the prompt (after "USER QUESTION:")
-            const questionMatch = exchange.prompt.match(/USER QUESTION:\s*(.+?)(?:\n|$)/s);
-            const extractedQuestion = questionMatch ? questionMatch[1].trim() : 'Question';
+            // Get the question - either directly from 'question' field or extract from 'prompt' field
+            let extractedQuestion: string;
+            if (exchange.question) {
+              // New format: question is stored directly
+              extractedQuestion = exchange.question;
+            } else if (exchange.prompt) {
+              // Old format: extract question from the full prompt
+              const questionMatch = exchange.prompt.match(/USER QUESTION:\s*(.+?)(?:\n|$)/s);
+              extractedQuestion = questionMatch ? questionMatch[1].trim() : 'Question';
+            } else {
+              extractedQuestion = 'Question';
+            }
             return `Q: ${extractedQuestion}\nA: ${exchange.response}`;
           })
           .join('\n\n')}`

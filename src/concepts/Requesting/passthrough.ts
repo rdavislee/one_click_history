@@ -25,12 +25,8 @@
  */
 
 export const inclusions: Record<string, string> = {
-  // Feel free to delete these example inclusions
-  "/api/LikertSurvey/_getSurveyQuestions": "this is a public query",
-  "/api/LikertSurvey/_getSurveyResponses": "responses are public",
-  "/api/LikertSurvey/_getRespondentAnswers": "answers are visible",
-  "/api/LikertSurvey/submitResponse": "allow anyone to submit response",
-  "/api/LikertSurvey/updateResponse": "allow anyone to update their response",
+  "/api/UserAuthentication/register": "public action - anyone can create an account",
+  "/api/UserAuthentication/login": "public action - anyone can log in",
 };
 
 /**
@@ -44,7 +40,32 @@ export const inclusions: Record<string, string> = {
  */
 
 export const exclusions: Array<string> = [
-  // Feel free to delete these example exclusions
-  "/api/LikertSurvey/createSurvey",
-  "/api/LikertSurvey/addQuestion",
+  // Requesting - internal actions, should not be directly accessible
+  "/api/Requesting/request",
+  "/api/Requesting/respond",
+  "/api/Requesting/_awaitResponse",
+  
+  // UserAuthentication - requires authentication
+  "/api/UserAuthentication/changePassword",
+  
+  // AIHistoricalContextAgent - all require authentication or are internal methods
+  "/api/AIHistoricalContextAgent/generateContext",
+  "/api/AIHistoricalContextAgent/answerQuestion",
+  "/api/AIHistoricalContextAgent/clearSession",
+  "/api/AIHistoricalContextAgent/getChat",
+  "/api/AIHistoricalContextAgent/_getChat",
+  "/api/AIHistoricalContextAgent/createContextPrompt",
+  "/api/AIHistoricalContextAgent/createQuestionPrompt",
+  "/api/AIHistoricalContextAgent/validateContextResponse",
+  "/api/AIHistoricalContextAgent/createHallucinationCheckPrompt",
+  "/api/AIHistoricalContextAgent/parseHallucinationCheckResponse",
+  "/api/AIHistoricalContextAgent/parseContextResponse",
+  "/api/AIHistoricalContextAgent/getChatForQuery",
+  
+  // LocationChatLedger - all require authentication
+  "/api/LocationChatLedger/recordChat",
+  "/api/LocationChatLedger/getUserChats",
+  "/api/LocationChatLedger/getChat",
+  "/api/LocationChatLedger/_getUserChats",
+  "/api/LocationChatLedger/_getChat",
 ];

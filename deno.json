@@ -1,5 +1,4 @@
 {
-    "nodeModulesDir": "auto",
     "imports": {
         "@concepts/": "./src/concepts/",
         "@concepts": "./src/concepts/concepts.ts",

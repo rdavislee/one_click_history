@@ -85,6 +85,54 @@ export default class LocationChatLedgerConcept {
   }
 
   /**
+   * getUserChats (user: User): (chats: List<ChatEntry>)
+   *
+   * **requires**: user is authenticated
+   *
+   * **effects**: Returns all chat entries where chat.user=user, sorted by createdAt descending.
+   */
+  async getUserChats({
+    user,
+  }: {
+    user: ID;
+  }): Promise<{ chats: ChatEntry[] } | { error: string }> {
+    const chats = await this.chatEntries
+      .find({ user })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    if (!chats) {
+      return { error: "Failed to retrieve chats" };
+    }
+
+    return { chats };
+  }
+
+  /**
+   * getChat (sessionId: String, user: User): (chat: ChatEntry)
+   *
+   * **requires**: chat entry exists with sessionId and chat.user=user
+   *
+   * **effects**: Returns the chat entry matching the sessionId and user.
+   */
+  async getChat({
+    sessionId,
+    user,
+  }: {
+    sessionId: ID;
+    user: ID;
+  }): Promise<{ chat: ChatEntry } | { error: string }> {
+    const chat = await this.chatEntries.findOne({ _id: sessionId, user });
+
+    if (!chat) {
+      return {
+        error: `Chat entry with session ID ${sessionId} for user ${user} not found.`,
+      };
+    }
+    return { chat };
+  }
+
+  /**
    * _getUserChats (user: User): (chat: List<ChatEntry>)
    *
    * **requires**: user is authenticated (implicitly handled)
@@ -96,16 +144,11 @@ export default class LocationChatLedgerConcept {
   }: {
     user: ID;
   }): Promise<Array<{ chat: ChatEntry }> | { error: string }> {
-    const chats = await this.chatEntries
-      .find({ user })
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    if (!chats) {
-      return { error: "Failed to retrieve chats" };
+    const result = await this.getUserChats({ user });
+    if ('error' in result) {
+      return result;
     }
-
-    return chats.map((c) => ({ chat: c }));
+    return result.chats.map((c) => ({ chat: c }));
   }
 
   /**
@@ -122,13 +165,10 @@ export default class LocationChatLedgerConcept {
     sessionId: ID;
     user: ID;
   }): Promise<Array<{ chat: ChatEntry }> | { error: string }> {
-    const chat = await this.chatEntries.findOne({ _id: sessionId, user });
-
-    if (!chat) {
-      return {
-        error: `Chat entry with session ID ${sessionId} for user ${user} not found.`,
-      };
+    const result = await this.getChat({ sessionId, user });
+    if ('error' in result) {
+      return result;
     }
-    return [{ chat }];
+    return [result];
   }
 }
